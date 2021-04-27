@@ -76,10 +76,10 @@ class Bola:
 
 		self.pos.y += self.velocity.y * dt + (self.acc.y * 0.5) * (dt * dt)
 
-		# if self.velocity.y < self.jump_high:
-		# 	self.jump_high = self.pos.y
+		if self.velocity.y < self.jump_high:
+			self.jump_high = self.velocity.y
 
-		# collision
+		# velocity
 		if self.rect.top < 0:
 			self.rect.top = 0
 
@@ -89,17 +89,16 @@ class Bola:
 			else:
 				self.velocity.y = 0
 				self.in_air = False
-				self.pos.y = 450
+			self.pos.y = 450
 		self.rect.bottom = self.pos.y
 
 
 	def bounce(self, dt):
-		# forces = -1 * (self.pos.y - self.jump_high) * self.koef
-		forces = -1 * self.velocity.y * self.koef
-		# self.jump_high = 0
+		forces = -1 * abs(self.jump_high) * self.koef
+		self.jump_high = 0
 		self.velocity.y = forces
 
-		if self.pos.y > 450:
+		if self.jump_high > 0:
 			self.velocity.y = 0
 			self.can_bounce = False
 
@@ -109,7 +108,7 @@ class Bola:
 		if not self.in_air:
 			self.velocity.y -= self.speed.y
 			self.in_air = True
-			# self.can_bounce = True
+			self.can_bounce = True
 
 
 	def get_input(self, events):
