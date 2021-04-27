@@ -95,12 +95,13 @@ class Bola:
 
 	def bounce(self, dt):
 		forces = -1 * abs(self.jump_high) * self.koef
-		self.jump_high = 0
 		self.velocity.y = forces
 
-		if self.jump_high > 0:
+		if not self.jump_high:
 			self.velocity.y = 0
 			self.can_bounce = False
+
+		self.jump_high = 0
 
 
 
