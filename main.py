@@ -51,8 +51,10 @@ def main():
 		window.surface.blit(teks, (20, 20))
 		teks = FontText.font_normal.render(f"velocity_y = {bola.velocity.y}", False, (255,255,255))
 		window.surface.blit(teks, (20, 40))
-		teks = FontText.font_normal.render(f"tinggi lompat = {abs(bola.jump_high)}", False, (255,255,255))
+		teks = FontText.font_normal.render(f"koefisien pegas = {bola.koef}", False, (255,255,255))
 		window.surface.blit(teks, (20, 60))
+		teks = FontText.font_normal.render(f"tinggi lompat = {abs(bola.jump_high)}", False, (255,255,255))
+		window.surface.blit(teks, (20, 80))
 		# FontText.render(window.surface, FontText.font_normal, (150, 20), f"velocity_x = {bola.velocity.x}", False, (255,255,255))
 
 		pygame.display.flip()
