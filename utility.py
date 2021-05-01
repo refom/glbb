@@ -49,6 +49,18 @@ class FontText:
 		teks = font.render(str(text), aa, color)
 		surface.blit(teks, teks.get_rect(center=pos))
 
+
+def rumus_glbb(velocity, acc, dt):
+	return velocity * dt + (acc * 0.5) * (dt * dt)
+
+
+def rumus_glbb2(velocity, acc, dt):
+	vel_end = velocity + (acc * dt)
+	vel_avg = (velocity + vel_end)/2
+	s = vel_avg * dt
+	return vel_end, s
+
+
 class Button:
 	all_buttons = []
 	static_buttons = []
