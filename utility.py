@@ -61,6 +61,16 @@ def rumus_glbb2(velocity, acc, dt):
 	return vel_end, s
 
 
+def collision_test(x, y, w, h, mxy, my=None):
+	if my == None:
+		mx = mxy[0]
+		my = mxy[1]
+	else:
+		mx = mxy
+	return mx > x and mx < x + w and my > y and my < y + h
+
+
+
 class Button:
 	all_buttons = []
 	static_buttons = []
