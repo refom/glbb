@@ -3,7 +3,8 @@ import pygame
 import math
 
 from vec import Vector2D
-from utility import FontText, rumus_glbb2, collision_test
+from utility import rumus_glbb2, collision_test
+from font_teks import FontText
 
 class Bola:
 	def __init__(self, pos, koef=0, color=(255,255,255), size=50):
@@ -27,11 +28,11 @@ class Bola:
 
 		self.angle_degrees = 0
 		self.limit_vel = Vector2D(3, 7)
-		self.speed = Vector2D(2, 15)
+		self.speed = Vector2D(1, 15)
 		self.gravity = 9.8/20
-		self.friction = -0.1
+		self.friction = -0.05
 		self.koef = koef
-		self.massa = math.pi * size/2 * size/2
+		self.massa = math.pi * size/2 * size/2 / 4
 		self.keliling = math.pi * size
 
 		self.constant = False
@@ -48,8 +49,8 @@ class Bola:
 		self.tali_str = 10
 		self.drag_acc = self.tali_str * 2
 
-
-	def draw(self, surface):
+	# Render
+	def render(self, surface):
 		pygame.draw.ellipse(surface, self.color, self.rect)
 		point_a = (self.line_out[0].x + self.rect.centerx, self.line_out[0].y + self.rect.centery)
 		point_b = (self.line_out[1].x + self.rect.centerx, self.line_out[1].y + self.rect.centery)
@@ -72,24 +73,23 @@ class Bola:
 				teks = FontText.font_normal.render(f"{abs(int(length_x))}", False, (255,255,255))
 				surface.blit(teks, mid)
 		
-	def draw_string(self, surface):
+	def render_string(self, surface):
 		pygame.draw.line(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
 
-
+	# Update
 	def update(self, dt):
 		self.scaling()
 		self.movement_x(dt)
 		self.movement_y(dt)
 
-
 	def scaling(self):
 		if self.scale_up:
-			self.size += 1
+			self.size += 0.5
 		if self.scale_down:
-			self.size -= 1
+			self.size -= 0.5
 
 		self.rect.w = self.rect.h = self.size
-		self.massa = math.pi * (self.size/2)**2
+		self.massa = math.pi * (self.size/2)**2 / 4
 		self.keliling = math.pi * self.size
 
 		self.line_in[0].y = -self.size/2
@@ -152,7 +152,6 @@ class Bola:
 		# 	self.velocity.x = -self.limit_vel.x
 		if abs(self.velocity.x) < 0.01: self.velocity.x = 0
 
-
 	def movement_y(self, dt):
 		all_forces = (self.massa * self.gravity) + self.drag_force.y + self.spring_force.y
 		acc_benda = all_forces / self.massa
@@ -177,7 +176,7 @@ class Bola:
 		self.spring_force.y = 0
 		self.drag_force.y = 0
 
-
+	# Other
 	def fix_bounce(self):
 		penetrate = 600 - self.pos.y
 		if penetrate < 0:
@@ -192,7 +191,6 @@ class Bola:
 		x = self.line_out[0].x + self.rect.centerx
 		y = self.line_out[0].y + self.rect.centery
 		self.points.append(Vector2D(x, y))
-
 
 	def grab(self):
 
@@ -213,7 +211,7 @@ class Bola:
 				self.spring_force.y += dy * self.tali_str
 				self.drag_force.y += self.velocity.y * -1 * self.drag_acc
 
-
+	# Event
 	def get_input(self, events):
 		for event in events:
 			if event.type == pygame.MOUSEBUTTONDOWN:
@@ -243,6 +241,10 @@ class Bola:
 					self.scale_up = True
 				if event.key == pygame.K_q:
 					self.scale_down = True
+				if event.key == pygame.K_2:
+					self.friction += 0.01
+				if event.key == pygame.K_1:
+					self.friction -= 0.01
 
 			if event.type == pygame.KEYUP:
 				if event.key == pygame.K_a:
