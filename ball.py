@@ -23,6 +23,8 @@ class Bola:
 		self.massa = width * height
 		self.jump_high = 0
 
+		self.constant = False
+		self.constant_spd = 3
 		self.left, self.right = False, False
 		self.in_air, self.can_bounce = False, False
 
@@ -43,6 +45,9 @@ class Bola:
 		if self.right:
 			self.acc.x += self.speed.x
 		
+		if self.constant:
+			self.acc.x = self.constant_spd
+
 		# pengurangan karena gesekan
 		self.acc.x += self.velocity.x * self.friction
 
@@ -55,10 +60,21 @@ class Bola:
 		# bisa juga make ini
 		# s = self.velocity.x * dt + (self.acc.x * 0.5) * (dt * dt)
 		# self.pos.x += s
+		self.velocity.x = vel_end
+
+		if self.pos.x < 0:
+			self.pos.x = 0
+			self.velocity.x *= -1
+			if self.constant:
+				self.constant_spd *= -1
+		elif self.pos.x > 1000 - self.rect.w:
+			self.pos.x = 1000 - self.rect.w
+			self.velocity.x *= -1
+			if self.constant:
+				self.constant_spd *= -1
 
 		self.rect.x = self.pos.x
 
-		self.velocity.x = vel_end
 		if self.velocity.x > self.limit_vel.x:
 			self.velocity.x = self.limit_vel.x
 		elif self.velocity.x < -self.limit_vel.x:
@@ -68,24 +84,38 @@ class Bola:
 
 	def movement_y(self, dt):
 		all_forces = self.massa * self.gravity
-		self.acc.y = all_forces / self.massa
+		acc_benda = all_forces / self.massa
+		self.acc.y = acc_benda
 
-		self.velocity.y += self.acc.y * dt
-		if self.velocity.y > self.limit_vel.y: self.velocity.y = self.limit_vel.y
-		# elif self.velocity.y < -self.limit_vel.y: self.velocity.y = -self.limit_vel.y
+		vel_end = self.velocity.y + (self.acc.y * dt)
+		vel_avg = (self.velocity.y + vel_end)/2
+		self.pos.y += vel_avg * dt
+		self.velocity.y = vel_end
 
-		self.pos.y += self.velocity.y * dt + (self.acc.y * 0.5) * (dt * dt)
+		# self.velocity.y += self.acc.y * dt
+		# self.pos.y += self.velocity.y * dt + (self.acc.y * 0.5) * (dt * dt)
 
 		if self.velocity.y < self.jump_high:
 			self.jump_high = self.velocity.y
 
-		# velocity
-		if self.rect.top < 0:
-			self.rect.top = 0
+		# Batas atas
+		if self.pos.y < self.rect.h:
+			self.pos.y = self.rect.h
 
 		if self.pos.y > 450:
 			if self.can_bounce:
-				self.bounce(dt)
+				self.fix_bounce()
+				self.velocity.y = -self.velocity.y * self.koef
+				if abs(self.velocity.y) < 3.5: self.in_air = False
+				# if abs(self.velocity.y) < 3.5: self.can_bounce = False
+				
+				# if abs(self.velocity.y) < 0.3:
+				# 	self.velocity.y = 0
+				# 	self.can_bounce = False
+				# else:
+				# 	self.velocity.y = -1 * self.velocity.y * self.koef
+				# self.velocity.y = -self.velocity.y * self.koef
+				# if self.velocity.y == 0: self.can_bounce = False
 			else:
 				self.velocity.y = 0
 				self.in_air = False
@@ -93,15 +123,21 @@ class Bola:
 		self.rect.bottom = self.pos.y
 
 
-	def bounce(self, dt):
-		forces = -1 * abs(self.jump_high) * self.koef
-		self.velocity.y = forces
+	def fix_bounce(self):
+		penetrate = 450 - self.pos.y
+		if penetrate < 0:
+			self.pos.y -= 2 * penetrate
+		# forces = -1 * abs(self.jump_high) * self.koef
+		# self.velocity.y = forces
+		# self.velocity.y = -1 * self.velocity.y * self.koef
 
-		if not self.jump_high:
-			self.velocity.y = 0
-			self.can_bounce = False
+		# if abs(self.velocity.y) < 0.1: self.can_bounce = False
 
-		self.jump_high = 0
+		# if not self.jump_high:
+		# 	self.velocity.y = 0
+		# 	self.can_bounce = False
+
+		# self.jump_high = 0
 
 
 
@@ -109,7 +145,6 @@ class Bola:
 		if not self.in_air:
 			self.velocity.y -= self.speed.y
 			self.in_air = True
-			self.can_bounce = True
 
 
 	def get_input(self, events):
@@ -121,8 +156,10 @@ class Bola:
 					self.right = True
 				if event.key == pygame.K_w:
 					self.jump()
-				# if event.key == K_s:
-				# 	self.down = True
+				if event.key == pygame.K_s:
+					self.can_bounce = not self.can_bounce
+				if event.key == pygame.K_c:
+					self.constant = not self.constant
 
 			if event.type == pygame.KEYUP:
 				if event.key == pygame.K_a:
