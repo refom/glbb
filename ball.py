@@ -3,7 +3,7 @@ import pygame
 import math
 
 from vec import Vector2D
-from utility import FontText, rumus_glbb2
+from utility import FontText, rumus_glbb2, collision_test
 
 class Bola:
 	def __init__(self, pos, koef=0, color=(255,255,255), size=50):
@@ -29,17 +29,24 @@ class Bola:
 		self.limit_vel = Vector2D(3, 7)
 		self.speed = Vector2D(2, 15)
 		self.gravity = 9.8/20
-		self.friction = -0.12
+		self.friction = -0.1
 		self.koef = koef
 		self.massa = math.pi * size/2 * size/2
 		self.keliling = math.pi * size
 
 		self.constant = False
-		self.constant_spd = 3
+		self.constant_spd = 2
 		self.left, self.right = False, False
 		self.scale_up, self.scale_down = False, False
 		self.in_air, self.can_bounce = False, False
 		self.points = []
+
+		self.button_down = False
+		self.selected = False
+		self.last_mouse_pos = Vector2D(0,0)
+		self.spring_force, self.drag_force = Vector2D(0,0), Vector2D(0,0)
+		self.tali_str = 10
+		self.drag_acc = self.tali_str * 2
 
 
 	def draw(self, surface):
@@ -64,6 +71,9 @@ class Bola:
 				pygame.draw.line(surface, (100,100,255), p1.xy, p2.xy)
 				teks = FontText.font_normal.render(f"{abs(int(length_x))}", False, (255,255,255))
 				surface.blit(teks, mid)
+		
+	def draw_string(self, surface):
+		pygame.draw.line(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
 
 
 	def update(self, dt):
@@ -86,15 +96,20 @@ class Bola:
 		self.line_in[1].y = self.size/2
 
 	def movement_x(self, dt):
-		self.acc.x = 0
+		x_forces = 0
+		
 		if self.left:
-			self.acc.x -= self.speed.x
+			x_forces -= self.speed.x
 		if self.right:
-			self.acc.x += self.speed.x
+			x_forces += self.speed.x
 		
 		if self.constant:
-			self.acc.x = self.constant_spd
+			x_forces = self.constant_spd
 
+		all_forces = (self.massa * x_forces) + self.spring_force.x + self.drag_force.x
+		acc_benda = all_forces / self.massa
+		self.acc.x = acc_benda
+		
 		# pengurangan karena gesekan
 		self.acc.x += self.velocity.x * self.friction
 
@@ -128,16 +143,18 @@ class Bola:
 				self.constant_spd *= -1
 
 		self.rect.x = self.pos.x
+		self.spring_force.x = 0
+		self.drag_force.x = 0
 
-		if self.velocity.x > self.limit_vel.x:
-			self.velocity.x = self.limit_vel.x
-		elif self.velocity.x < -self.limit_vel.x:
-			self.velocity.x = -self.limit_vel.x
-		elif abs(self.velocity.x) < 0.01: self.velocity.x = 0
+		# if self.velocity.x > self.limit_vel.x:
+		# 	self.velocity.x = self.limit_vel.x
+		# elif self.velocity.x < -self.limit_vel.x:
+		# 	self.velocity.x = -self.limit_vel.x
+		if abs(self.velocity.x) < 0.01: self.velocity.x = 0
 
 
 	def movement_y(self, dt):
-		all_forces = self.massa * self.gravity
+		all_forces = (self.massa * self.gravity) + self.drag_force.y + self.spring_force.y
 		acc_benda = all_forces / self.massa
 		self.acc.y = acc_benda
 
@@ -145,11 +162,7 @@ class Bola:
 		self.pos.y += s
 		self.velocity.y = vel_end
 
-		# Batas atas
-		# if self.pos.y < self.size:
-		# 	self.pos.y = self.size
-
-		if self.pos.y > 450:
+		if self.pos.y > 600:
 			if self.can_bounce:
 				self.fix_bounce()
 				self.velocity.y = -self.velocity.y * self.koef
@@ -157,14 +170,16 @@ class Bola:
 			else:
 				self.velocity.y = 0
 				self.in_air = False
-			self.pos.y = 450
+			self.pos.y = 600
 			self.acc.y += -self.acc.y
 
 		self.rect.bottom = self.pos.y
+		self.spring_force.y = 0
+		self.drag_force.y = 0
 
 
 	def fix_bounce(self):
-		penetrate = 450 - self.pos.y
+		penetrate = 600 - self.pos.y
 		if penetrate < 0:
 			self.pos.y -= 2 * penetrate
 
@@ -179,8 +194,36 @@ class Bola:
 		self.points.append(Vector2D(x, y))
 
 
+	def grab(self):
+
+		if not self.selected:
+			if self.button_down and collision_test(self.rect.x, self.rect.y, self.rect.w, self.rect.h, self.last_mouse_pos.xy):
+				self.selected = True
+		else:
+			if not self.button_down:
+				self.selected = False
+			else:
+				# X
+				dx = self.last_mouse_pos.x - self.rect.centerx
+				self.spring_force.x += dx * self.tali_str
+				self.drag_force.x += self.velocity.x * -1 * self.drag_acc
+
+				# Y
+				dy = self.last_mouse_pos.y - self.rect.centery
+				self.spring_force.y += dy * self.tali_str
+				self.drag_force.y += self.velocity.y * -1 * self.drag_acc
+
+
 	def get_input(self, events):
 		for event in events:
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.button == 1:
+					self.button_down = True
+
+			if event.type == pygame.MOUSEBUTTONUP:
+				if event.button == 1:
+					self.button_down = False
+
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_a:
 					self.left = True
@@ -194,6 +237,8 @@ class Bola:
 					self.constant = not self.constant
 				if event.key == pygame.K_f:
 					self.put_point()
+				if event.key == pygame.K_g:
+					self.points.clear()
 				if event.key == pygame.K_e:
 					self.scale_up = True
 				if event.key == pygame.K_q:
@@ -208,5 +253,10 @@ class Bola:
 					self.scale_up = False
 				if event.key == pygame.K_q:
 					self.scale_down = False
+
+		if self.button_down:
+			self.last_mouse_pos.xy = mouse_pos = pygame.mouse.get_pos()
+			self.last_mouse_pos.x = mouse_pos[0]
+			self.last_mouse_pos.y = mouse_pos[1]
 
 
