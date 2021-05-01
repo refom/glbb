@@ -17,12 +17,12 @@ class Bola:
 		self.acc = Vector2D(0, 0)
 		self.rect.bottom = self.pos.y
 		self.line_in = [
-			Vector2D(0, -self.size//2),
-			Vector2D(0, self.size//2),
+			Vector2D(0, -self.size/2),
+			Vector2D(0, self.size/2),
 		]
 		self.line_out = [
-			Vector2D(0, -self.size//2),
-			Vector2D(0, self.size//2),
+			Vector2D(0, -self.size/2),
+			Vector2D(0, self.size/2),
 		]
 
 		self.angle_degrees = 0
@@ -37,8 +37,10 @@ class Bola:
 		self.constant = False
 		self.constant_spd = 3
 		self.left, self.right = False, False
+		self.scale_up, self.scale_down = False, False
 		self.in_air, self.can_bounce = False, False
 		self.points = []
+
 
 	def draw(self, surface):
 		pygame.draw.ellipse(surface, self.color, self.rect)
@@ -63,9 +65,25 @@ class Bola:
 				teks = FontText.font_normal.render(f"{abs(int(length_x))}", False, (255,255,255))
 				surface.blit(teks, mid)
 
+
 	def update(self, dt):
+		self.scaling()
 		self.movement_x(dt)
 		self.movement_y(dt)
+
+
+	def scaling(self):
+		if self.scale_up:
+			self.size += 1
+		if self.scale_down:
+			self.size -= 1
+
+		self.rect.w = self.rect.h = self.size
+		self.massa = math.pi * (self.size/2)**2
+		self.keliling = math.pi * self.size
+
+		self.line_in[0].y = -self.size/2
+		self.line_in[1].y = self.size/2
 
 	def movement_x(self, dt):
 		self.acc.x = 0
@@ -118,7 +136,6 @@ class Bola:
 		elif abs(self.velocity.x) < 0.01: self.velocity.x = 0
 
 
-
 	def movement_y(self, dt):
 		all_forces = self.massa * self.gravity
 		acc_benda = all_forces / self.massa
@@ -129,8 +146,8 @@ class Bola:
 		self.velocity.y = vel_end
 
 		# Batas atas
-		if self.pos.y < self.size:
-			self.pos.y = self.size
+		# if self.pos.y < self.size:
+		# 	self.pos.y = self.size
 
 		if self.pos.y > 450:
 			if self.can_bounce:
@@ -141,8 +158,10 @@ class Bola:
 				self.velocity.y = 0
 				self.in_air = False
 			self.pos.y = 450
+			self.acc.y += -self.acc.y
 
 		self.rect.bottom = self.pos.y
+
 
 	def fix_bounce(self):
 		penetrate = 450 - self.pos.y
@@ -175,11 +194,19 @@ class Bola:
 					self.constant = not self.constant
 				if event.key == pygame.K_f:
 					self.put_point()
+				if event.key == pygame.K_e:
+					self.scale_up = True
+				if event.key == pygame.K_q:
+					self.scale_down = True
 
 			if event.type == pygame.KEYUP:
 				if event.key == pygame.K_a:
 					self.left = False
 				if event.key == pygame.K_d:
 					self.right = False
+				if event.key == pygame.K_e:
+					self.scale_up = False
+				if event.key == pygame.K_q:
+					self.scale_down = False
 
 

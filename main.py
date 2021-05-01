@@ -17,8 +17,6 @@ class Window:
 		self.fps = 120
 
 
-
-
 def main():
 	pygame.init()
 
@@ -59,6 +57,8 @@ def main():
 		window.surface.blit(teks, (20, 100))
 		teks = FontText.font_normal.render(f"keliling = {bola.keliling}", False, (255,255,255))
 		window.surface.blit(teks, (20, 120))
+		teks = FontText.font_normal.render(f"massa = {bola.massa}", False, (255,255,255))
+		window.surface.blit(teks, (20, 140))
 
 		pygame.display.flip()
 
