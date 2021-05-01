@@ -39,11 +39,15 @@ def main():
 					sys.exit()
 
 		bola.get_input(events)
+		bola.grab()
 		bola.update(dt)
 
 		window.surface.fill((0, 0, 0))
 		bola.draw(window.surface)
-		pygame.draw.line(window.surface, (255,255,255), (0, 450), (window.size[0], 450))
+		if bola.selected:
+			bola.draw_string(window.surface)
+
+		pygame.draw.line(window.surface, (255,255,255), (0, 600), (window.size[0], 600))
 
 		teks = FontText.font_normal.render(f"velocity_x = {bola.velocity.x}", False, (255,255,255))
 		window.surface.blit(teks, (20, 20))
