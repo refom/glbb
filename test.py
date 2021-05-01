@@ -2,7 +2,8 @@ import pygame, sys
 from pygame.locals import *
 
 from vec import Vector2D
-from utility import FontText, rumus_glbb, rumus_glbb2
+from utility import rumus_glbb, rumus_glbb2
+from font_teks import FontText
 
 import math
 

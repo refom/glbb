@@ -36,7 +36,7 @@ class Bola:
 		self.keliling = math.pi * size
 
 		self.constant = False
-		self.constant_spd = 2
+		self.constant_spd = 1.5
 		self.left, self.right = False, False
 		self.scale_up, self.scale_down = False, False
 		self.in_air, self.can_bounce = False, False
@@ -69,12 +69,12 @@ class Bola:
 				length_y = p1.y - p2.y
 				mid = (p1.x - length_x//2, p1.y - length_y//2)
 
-				pygame.draw.line(surface, (100,100,255), p1.xy, p2.xy)
+				pygame.draw.aaline(surface, (100,100,255), p1.xy, p2.xy)
 				teks = FontText.font_normal.render(f"{abs(int(length_x))}", False, (255,255,255))
 				surface.blit(teks, mid)
 		
 	def render_string(self, surface):
-		pygame.draw.line(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
+		pygame.draw.aaline(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
 
 	# Update
 	def update(self, dt):
@@ -133,12 +133,12 @@ class Bola:
 
 		if self.pos.x < 0:
 			self.pos.x = 0
-			self.velocity.x *= -1
+			self.velocity.x = -self.velocity.x * self.koef
 			if self.constant:
 				self.constant_spd *= -1
 		elif self.pos.x > 1000 - self.size:
 			self.pos.x = 1000 - self.size
-			self.velocity.x *= -1
+			self.velocity.x = -self.velocity.x * self.koef
 			if self.constant:
 				self.constant_spd *= -1
 
