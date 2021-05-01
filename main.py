@@ -29,7 +29,7 @@ def main():
 
 	while window.run:
 		events = pygame.event.get()
-		dt = window.clock.tick(60) * 0.001 * window.fps
+		dt = window.clock.tick(120) * 0.001 * window.fps / 1.5
 
 		for event in events:
 			if event.type == QUIT:
@@ -51,11 +51,14 @@ def main():
 		window.surface.blit(teks, (20, 20))
 		teks = FontText.font_normal.render(f"velocity_y = {bola.velocity.y}", False, (255,255,255))
 		window.surface.blit(teks, (20, 40))
-		teks = FontText.font_normal.render(f"koefisien pegas = {bola.koef}", False, (255,255,255))
+		teks = FontText.font_normal.render(f"koefisien = {bola.koef}", False, (255,255,255))
 		window.surface.blit(teks, (20, 60))
-		teks = FontText.font_normal.render(f"tinggi lompat = {abs(bola.jump_high)}", False, (255,255,255))
+		teks = FontText.font_normal.render(f"acc_y = {bola.acc.y}", False, (255,255,255))
 		window.surface.blit(teks, (20, 80))
-		# FontText.render(window.surface, FontText.font_normal, (150, 20), f"velocity_x = {bola.velocity.x}", False, (255,255,255))
+		teks = FontText.font_normal.render(f"angle_degrees = {bola.angle_degrees}", False, (255,255,255))
+		window.surface.blit(teks, (20, 100))
+		teks = FontText.font_normal.render(f"keliling = {bola.keliling}", False, (255,255,255))
+		window.surface.blit(teks, (20, 120))
 
 		pygame.display.flip()
 
