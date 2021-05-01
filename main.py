@@ -1,8 +1,8 @@
-import pygame, sys
+import pygame, sys, os
 from pygame.locals import *
 
 from ball import Bola
-from utility import FontText
+from font_teks import FontText
 
 # Window
 class Window:
@@ -23,6 +23,9 @@ def main():
 	window = Window((1000, 640))
 	bola = Bola((400, 450), 0.9)
 
+	# Font
+	FontText.title = os.path.join(os.getcwd(), "data", "font", "title.otf")
+	FontText.normal = os.path.join(os.getcwd(), "data", "font", "normal.ttf")
 	FontText.update()
 
 	while window.run:
@@ -43,26 +46,30 @@ def main():
 		bola.update(dt)
 
 		window.surface.fill((0, 0, 0))
-		bola.draw(window.surface)
+		bola.render(window.surface)
 		if bola.selected:
-			bola.draw_string(window.surface)
+			bola.render_string(window.surface)
 
 		pygame.draw.line(window.surface, (255,255,255), (0, 600), (window.size[0], 600))
 
-		teks = FontText.font_normal.render(f"velocity_x = {bola.velocity.x}", False, (255,255,255))
+		teks = FontText.font_small.render(f"velocity_x = {bola.velocity.x}", False, (255,255,255))
 		window.surface.blit(teks, (20, 20))
-		teks = FontText.font_normal.render(f"velocity_y = {bola.velocity.y}", False, (255,255,255))
+		teks = FontText.font_small.render(f"velocity_y = {bola.velocity.y}", False, (255,255,255))
 		window.surface.blit(teks, (20, 40))
-		teks = FontText.font_normal.render(f"koefisien = {bola.koef}", False, (255,255,255))
+		teks = FontText.font_small.render(f"koefisien = {bola.koef}", False, (255,255,255))
 		window.surface.blit(teks, (20, 60))
-		teks = FontText.font_normal.render(f"acc_y = {bola.acc.y}", False, (255,255,255))
+		teks = FontText.font_small.render(f"acc_y = {bola.acc.y}", False, (255,255,255))
 		window.surface.blit(teks, (20, 80))
-		teks = FontText.font_normal.render(f"angle_degrees = {bola.angle_degrees}", False, (255,255,255))
+		teks = FontText.font_small.render(f"angle_degrees = {bola.angle_degrees}", False, (255,255,255))
 		window.surface.blit(teks, (20, 100))
-		teks = FontText.font_normal.render(f"keliling = {bola.keliling}", False, (255,255,255))
+		teks = FontText.font_small.render(f"keliling = {int(bola.keliling)}", False, (255,255,255))
 		window.surface.blit(teks, (20, 120))
-		teks = FontText.font_normal.render(f"massa = {bola.massa}", False, (255,255,255))
+		teks = FontText.font_small.render(f"massa = {int(bola.massa)}", False, (255,255,255))
 		window.surface.blit(teks, (20, 140))
+		teks = FontText.font_small.render(f"radius (r) = {bola.size}", False, (255,255,255))
+		window.surface.blit(teks, (20, 160))
+		teks = FontText.font_small.render(f"friction = {bola.friction}", False, (255,255,255))
+		window.surface.blit(teks, (20, 180))
 
 		pygame.display.flip()
 
