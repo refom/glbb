@@ -40,7 +40,7 @@ class Bola:
 		self.left, self.right = False, False
 		self.scale_up, self.scale_down = False, False
 		self.in_air, self.can_bounce = False, False
-		self.in_box = False
+		self.in_box = True
 		self.points = []
 
 		self.button_down = False
@@ -88,6 +88,9 @@ class Bola:
 			self.size += 0.5
 		if self.scale_down:
 			self.size -= 0.5
+
+		if self.size < 20.0:
+			self.size = 20.0
 
 		self.rect.w = self.rect.h = self.size
 		self.massa = math.pi * (self.size/2)**2 / 4
