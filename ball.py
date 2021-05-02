@@ -27,7 +27,7 @@ class Bola:
 		]
 
 		self.angle_degrees = 0
-		self.limit_vel = Vector2D(3, 7)
+		# self.limit_vel = Vector2D(3, 7)
 		self.speed = Vector2D(1, 15)
 		self.gravity = 9.8/20
 		self.friction = -0.05
@@ -40,6 +40,7 @@ class Bola:
 		self.left, self.right = False, False
 		self.scale_up, self.scale_down = False, False
 		self.in_air, self.can_bounce = False, False
+		self.in_box = False
 		self.points = []
 
 		self.button_down = False
@@ -77,9 +78,9 @@ class Bola:
 		pygame.draw.aaline(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
 
 	# Update
-	def update(self, dt):
+	def update(self, dt, window):
 		self.scaling()
-		self.movement_x(dt)
+		self.movement_x(dt, window)
 		self.movement_y(dt)
 
 	def scaling(self):
@@ -95,7 +96,7 @@ class Bola:
 		self.line_in[0].y = -self.size/2
 		self.line_in[1].y = self.size/2
 
-	def movement_x(self, dt):
+	def movement_x(self, dt, window):
 		x_forces = 0
 		
 		if self.left:
@@ -131,16 +132,23 @@ class Bola:
 		for i in range(len(self.line_in)):
 			self.line_out[i] = self.line_in[i].rotate(self.angle_degrees)
 
-		if self.pos.x < 0:
-			self.pos.x = 0
-			self.velocity.x = -self.velocity.x * self.koef
-			if self.constant:
-				self.constant_spd *= -1
-		elif self.pos.x > 1000 - self.size:
-			self.pos.x = 1000 - self.size
-			self.velocity.x = -self.velocity.x * self.koef
-			if self.constant:
-				self.constant_spd *= -1
+		if self.in_box:
+			if self.pos.x < 0:
+				self.pos.x = 0
+				self.velocity.x = -self.velocity.x * self.koef
+				if self.constant:
+					self.constant_spd *= -1
+			elif self.pos.x > window.size[0] - self.size:
+				self.pos.x = window.size[0] - self.size
+				self.velocity.x = -self.velocity.x * self.koef
+				if self.constant:
+					self.constant_spd *= -1
+		else:
+			if self.pos.x < -self.size:
+				self.pos.x = window.size[0] + self.size
+			elif self.pos.x > window.size[0] + self.size:
+				self.pos.x = -self.size
+
 
 		self.rect.x = self.pos.x
 		self.spring_force.x = 0
@@ -161,6 +169,16 @@ class Bola:
 		self.pos.y += s
 		self.velocity.y = vel_end
 
+		if self.in_box:
+			if self.pos.y < self.size:
+				if self.can_bounce:
+					self.fix_bounce()
+					self.velocity.y = -self.velocity.y * self.koef
+				else:
+					self.velocity.y = 0
+				self.pos.y = self.size
+
+		# ground
 		if self.pos.y > 600:
 			if self.can_bounce:
 				self.fix_bounce()
@@ -180,6 +198,10 @@ class Bola:
 	def fix_bounce(self):
 		penetrate = 600 - self.pos.y
 		if penetrate < 0:
+			self.pos.y -= 2 * penetrate
+
+		penetrate = 0 - self.pos.y
+		if penetrate > 0:
 			self.pos.y -= 2 * penetrate
 
 	def jump(self):
@@ -233,6 +255,8 @@ class Bola:
 					self.can_bounce = not self.can_bounce
 				if event.key == pygame.K_c:
 					self.constant = not self.constant
+				if event.key == pygame.K_b:
+					self.in_box = not self.in_box
 				if event.key == pygame.K_f:
 					self.put_point()
 				if event.key == pygame.K_g:

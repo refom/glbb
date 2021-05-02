@@ -16,7 +16,7 @@ class FontText:
 		cls.font_title = pygame.font.Font(cls.title, 100)
 		cls.font_h1 = pygame.font.Font(cls.normal, 80)
 		cls.font_h2 = pygame.font.Font(cls.normal, 60)
-		cls.font_h3 = pygame.font.Font(cls.normal, 40)
+		cls.font_h3 = pygame.font.Font(cls.normal, 36)
 
 	@staticmethod
 	def render(surface, font, pos, text, color, aa=False):
