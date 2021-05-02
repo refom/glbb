@@ -23,6 +23,22 @@ class Window:
 		self.surface.fill(COLORS.black)
 	
 
+def render_teks(surface, arr, x, y, get_x=False, get_y=False):
+	x_temp = 0
+	for t in arr:
+		t_obj = FontText.font_small.render(t, False, COLORS.white)
+		surface.blit(t_obj, (x, y))
+		y += 20
+		
+		r = t_obj.get_rect()
+		if r.right > x_temp:
+			x_temp = r.right
+
+	if get_x:
+		return x_temp
+	if get_y:
+		return y
+
 
 def main():
 	pygame.init()
@@ -110,30 +126,19 @@ def main():
 				f"= {bola.acc.y:.3f}",
 			]
 
-			x = 0
-			y_awal = 50
-			y = y_awal
 			# Teks
-			for t in teks:
-				t_obj = FontText.font_small.render(t, False, COLORS.white)
-				window.surface.blit(t_obj, (20, y))
-				y += 20
-				
-				r = t_obj.get_rect()
-				if r.right > x:
-					x = r.right
-
+			y = 50
+			x = render_teks(window.surface, teks, 20, y, get_x=True)
 			x += 40
-			y = y_awal
-			# Value
-			for v in value:
-				v_obj = FontText.font_small.render(v, False, COLORS.white)
-				window.surface.blit(v_obj, (x, y))
-				y += 20
 
+			# Value
+			y = render_teks(window.surface, value, x, y, get_y=True)
+
+			# Keys
 			y += 20
 			teks = FontText.font_small.render("- Keys :", False, COLORS.white)
 			window.surface.blit(teks, (20, y))
+			y += 20
 
 			teks = [
 				"A/D",
@@ -154,26 +159,12 @@ def main():
 				"= dalam/luar box",
 			]
 
-			y_awal = y + 20
-			y = y_awal
-			x = 0
-			for t in teks:
-				t_obj = FontText.font_small.render(t, False, COLORS.white)
-				window.surface.blit(t_obj, (20, y))
-				y += 20
-
-				r = t_obj.get_rect()
-				if r.right > x:
-					x = r.right
-
+			# Teks
+			x = render_teks(window.surface, teks, 20, y, True)
 			x += 40
-			y = y_awal
-			# Value
-			for v in value:
-				v_obj = FontText.font_small.render(v, False, COLORS.white)
-				window.surface.blit(v_obj, (x, y))
-				y += 20
 
+			# Value
+			render_teks(window.surface, value, x, y)
 
 			
 		pygame.display.flip()
