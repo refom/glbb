@@ -7,11 +7,12 @@ from utility import rumus_glbb2, collision_test
 from font_teks import FontText
 
 class Bola:
-	def __init__(self, pos, koef=0, color=(255,255,255), size=50):
+	def __init__(self, pos, koef=0, color=(255,255,255), radius=25):
 
 		self.color = color
-		self.rect = pygame.Rect(pos, (size, size))
-		self.size = size
+		self.radius = radius
+		self.size = radius * 2
+		self.rect = pygame.Rect((pos[0] - radius, pos[1] - radius), (self.size, self.size))
 
 		self.pos = Vector2D(pos)
 		self.last_pos = Vector2D(pos)
@@ -19,12 +20,12 @@ class Bola:
 		self.acc = Vector2D(0, 0)
 		self.rect.bottom = self.pos.y
 		self.line_in = [
-			Vector2D(0, -self.size/2),
-			Vector2D(0, self.size/2),
+			Vector2D(0, -self.radius),
+			Vector2D(0, self.radius),
 		]
 		self.line_out = [
-			Vector2D(0, -self.size/2),
-			Vector2D(0, self.size/2),
+			Vector2D(0, -self.radius),
+			Vector2D(0, self.radius),
 		]
 
 		self.angle_degrees = 0
@@ -33,8 +34,8 @@ class Bola:
 		self.gravity = 9.8/20
 		self.friction = -0.05
 		self.koef = koef
-		self.massa = math.pi * size/2 * size/2 / 4
-		self.keliling = math.pi * size
+		self.massa = math.pi * self.radius * self.radius / 4
+		self.keliling = math.pi * self.size
 
 		self.constant = False
 		self.constant_spd = 1.5
@@ -53,9 +54,9 @@ class Bola:
 
 	# Render
 	def render(self, surface):
-		pygame.draw.ellipse(surface, self.color, self.rect)
-		point_a = (self.line_out[0].x + self.rect.centerx, self.line_out[0].y + self.rect.centery)
-		point_b = (self.line_out[1].x + self.rect.centerx, self.line_out[1].y + self.rect.centery)
+		pygame.draw.circle(surface, self.color, (self.pos.x, self.pos.y), self.radius)
+		point_a = (self.line_out[0].x + self.pos.x, self.line_out[0].y + self.pos.y)
+		point_b = (self.line_out[1].x + self.pos.x, self.line_out[1].y + self.pos.y)
 		pygame.draw.line(surface, (255,0,0), point_a, point_b, 5)
 	
 		for i in self.points:
@@ -76,7 +77,7 @@ class Bola:
 				surface.blit(teks, mid)
 		
 	def render_string(self, surface):
-		pygame.draw.aaline(surface, (100,255,100), self.rect.center, self.last_mouse_pos.xy, 2)
+		pygame.draw.aaline(surface, (100,255,100), (self.pos.x, self.pos.y), self.last_mouse_pos.xy, 2)
 
 	# Update
 	def update(self, dt, window):
@@ -87,19 +88,20 @@ class Bola:
 
 	def scaling(self):
 		if self.scale_up:
-			self.size += 0.5
+			self.radius += 0.5
 		if self.scale_down:
-			self.size -= 0.5
+			self.radius -= 0.5
 
-		if self.size < 20.0:
-			self.size = 20.0
+		if self.radius < 20.0:
+			self.radius = 20.0
 
+		self.size = self.radius * 2
 		self.rect.w = self.rect.h = self.size
-		self.massa = math.pi * (self.size/2)**2 / 4
+		self.massa = math.pi * (self.radius)**2 / 4
 		self.keliling = math.pi * self.size
 
-		self.line_in[0].y = -self.size/2
-		self.line_in[1].y = self.size/2
+		self.line_in[0].y = -self.radius
+		self.line_in[1].y = self.radius
 
 	def movement_x(self, dt, window):
 		x_forces = 0
@@ -124,10 +126,9 @@ class Bola:
 		# self.velocity.x = vel_end
 
 		# line
-		r = self.size/2
-		teta = s / r
+		teta = s / self.radius
 		degree = math.degrees(teta)
-		v = r * teta / dt
+		v = self.radius * teta / dt
 		# w = v / r
 		# v_end = math.degrees(w)
 
@@ -138,24 +139,24 @@ class Bola:
 			self.line_out[i] = self.line_in[i].rotate(self.angle_degrees)
 
 		if self.in_box:
-			if self.pos.x < 0:
-				self.pos.x = 0
+			if self.pos.x < self.radius:
+				self.pos.x = self.radius
 				self.velocity.x = -self.velocity.x * self.koef
 				if self.constant:
 					self.constant_spd *= -1
-			elif self.pos.x > window.size[0] - self.size:
-				self.pos.x = window.size[0] - self.size
+			elif self.pos.x > window.size[0] - self.radius:
+				self.pos.x = window.size[0] - self.radius
 				self.velocity.x = -self.velocity.x * self.koef
 				if self.constant:
 					self.constant_spd *= -1
 		else:
-			if self.pos.x < -self.size:
-				self.pos.x = window.size[0] + self.size
-			elif self.pos.x > window.size[0] + self.size:
-				self.pos.x = -self.size
+			if self.pos.x < -self.radius:
+				self.pos.x = window.size[0] + self.radius
+			elif self.pos.x > window.size[0] + self.radius:
+				self.pos.x = -self.radius
 
 
-		self.rect.x = self.pos.x
+		self.rect.centerx = self.pos.x
 		self.spring_force.x = 0
 		self.drag_force.x = 0
 
@@ -175,16 +176,16 @@ class Bola:
 		self.velocity.y = vel_end
 
 		if self.in_box:
-			if self.pos.y < self.size:
+			if self.pos.y < self.radius:
 				if self.can_bounce:
 					self.fix_bounce()
 					self.velocity.y = -self.velocity.y * self.koef
 				else:
 					self.velocity.y = 0
-				self.pos.y = self.size
+				self.pos.y = self.radius
 
 		# ground
-		if self.pos.y > 600:
+		if self.pos.y > 600 - self.radius:
 			if self.can_bounce:
 				self.fix_bounce()
 				self.velocity.y = -self.velocity.y * self.koef
@@ -192,7 +193,7 @@ class Bola:
 			else:
 				self.velocity.y = 0
 				self.in_air = False
-			self.pos.y = 600
+			self.pos.y = 600 - self.radius
 			self.acc.y += -self.acc.y
 
 		self.rect.bottom = self.pos.y
@@ -217,11 +218,11 @@ class Bola:
 
 	# Other
 	def fix_bounce(self):
-		penetrate = 600 - self.pos.y
+		penetrate = 600 - self.pos.y - self.radius
 		if penetrate < 0:
 			self.pos.y -= 2 * penetrate
 
-		penetrate = 0 - self.pos.y
+		penetrate = 0 - self.pos.y - self.radius
 		if penetrate > 0:
 			self.pos.y -= 2 * penetrate
 
@@ -231,8 +232,8 @@ class Bola:
 			self.in_air = True
 
 	def put_point(self):
-		x = self.line_out[0].x + self.rect.centerx
-		y = self.line_out[0].y + self.rect.centery
+		x = self.line_out[0].x + self.pos.x
+		y = self.line_out[0].y + self.pos.y
 		self.points.append(Vector2D(x, y))
 
 	def grab(self):
@@ -245,12 +246,12 @@ class Bola:
 				self.selected = False
 			else:
 				# X
-				dx = self.last_mouse_pos.x - self.rect.centerx
+				dx = self.last_mouse_pos.x - self.pos.x
 				self.spring_force.x += dx * self.tali_str
 				self.drag_force.x += self.velocity.x * -1 * self.drag_acc
 
 				# Y
-				dy = self.last_mouse_pos.y - self.rect.centery
+				dy = self.last_mouse_pos.y - self.pos.y
 				self.spring_force.y += dy * self.tali_str
 				self.drag_force.y += self.velocity.y * -1 * self.drag_acc
 
