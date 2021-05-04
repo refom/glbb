@@ -14,6 +14,7 @@ class Bola:
 		self.size = size
 
 		self.pos = Vector2D(pos)
+		self.last_pos = Vector2D(pos)
 		self.velocity = Vector2D(0, 0)
 		self.acc = Vector2D(0, 0)
 		self.rect.bottom = self.pos.y
@@ -82,6 +83,7 @@ class Bola:
 		self.scaling()
 		self.movement_x(dt, window)
 		self.movement_y(dt)
+		# self.rotating(dt)
 
 	def scaling(self):
 		if self.scale_up:
@@ -196,6 +198,22 @@ class Bola:
 		self.rect.bottom = self.pos.y
 		self.spring_force.y = 0
 		self.drag_force.y = 0
+
+	# def rotating(self, dt):
+
+	# 	s_x = self.velocity.x * dt
+	# 	s_y = -self.velocity.y * dt
+	# 	s = s_x + s_y
+	# 	r = self.size/2
+
+	# 	teta = s / r
+	# 	degree = math.degrees(teta)
+
+	# 	self.angle_degrees = self.angle_degrees % 360 + degree
+	# 	for i in range(len(self.line_in)):
+	# 		self.line_out[i] = self.line_in[i].rotate(self.angle_degrees)
+		
+
 
 	# Other
 	def fix_bounce(self):
