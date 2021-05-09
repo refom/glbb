@@ -113,8 +113,8 @@ def main():
 				f"keliling",
 				f"massa",
 				f"friction",
-				f"acc x",
-				f"acc y",
+				f"vel x",
+				f"vel y",
 			]
 			value = [
 				f"= {bola.size/2}",
@@ -122,8 +122,8 @@ def main():
 				f"= {int(bola.keliling)}",
 				f"= {int(bola.massa)}",
 				f"= {bola.friction:.3f}",
-				f"= {bola.acc.x:.3f}",
-				f"= {bola.acc.y:.3f}",
+				f"= {bola.velocity.x:.3f}",
+				f"= {bola.velocity.y:.3f}",
 			]
 
 			# Teks

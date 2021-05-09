@@ -189,7 +189,9 @@ class Bola:
 			if self.can_bounce:
 				self.fix_bounce()
 				self.velocity.y = -self.velocity.y * self.koef
-				if abs(self.velocity.y) < 3.5: self.in_air = False
+				if abs(self.velocity.y) < 3.5:
+					self.velocity.y = 0
+					self.in_air = False
 			else:
 				self.velocity.y = 0
 				self.in_air = False
