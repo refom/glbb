@@ -5,6 +5,8 @@ from ball import Bola
 from font_teks import FontText
 from warna import COLORS
 from utility import collision_test
+from input_box import InputBox
+from button import Button
 
 # Window
 class Window:
@@ -58,6 +60,12 @@ def main():
 	stat_teks = FontText.font_semi_normal.render(f"< Bola stats :", False, COLORS.white)
 	stat_rect = stat_teks.get_rect(x=20, y=20)
 
+	custom_vel = InputBox((0, 0), (100, 30), 0)
+	custom_vel.font = FontText.font_small
+
+	btn_right = Button((0,0), (50,50))
+	btn_left = Button((0,0), (50,50), left=True)
+
 	while window.run:
 		events = pygame.event.get()
 		dt = window.clock.tick(120) * 0.001 * window.fps / 1.5
@@ -79,6 +87,25 @@ def main():
 					if event.button == 1 and collision_test(stat_rect.x, stat_rect.y, stat_rect.w, stat_rect.h, event.pos):
 						show_info = False
 
+		# Input handle
+		custom_vel.pos.x = window.size[0] - 120
+		custom_vel.pos.y = (window.size[1]/2) - 100
+
+		btn_right.pos.x = window.size[0] - 60
+		btn_right.pos.y = (window.size[1]/2) - 60
+
+		btn_left.pos.x = window.size[0] - 120
+		btn_left.pos.y = (window.size[1]/2) - 60
+
+		InputBox.handle_event(events)
+		Button.handle_event(events)
+
+		if btn_right.get_click():
+			bola.velocity.x = custom_vel.value
+		elif btn_left.get_click():
+			bola.velocity.x = -custom_vel.value
+
+
 		# Bola handle
 		bola.get_input(events)
 		bola.grab()
@@ -88,6 +115,11 @@ def main():
 		bola.render(window.surface)
 		if bola.selected:
 			bola.render_string(window.surface)
+
+		# Custom Velocity
+		custom_vel.render(window.surface)
+		btn_right.render(window.surface)
+		btn_left.render(window.surface)
 
 		# Tanah
 		pygame.draw.line(window.surface, COLORS.white, (0, 600), (window.size[0], 600))
@@ -100,6 +132,10 @@ def main():
 		window.surface.blit(teks, (220, 610))
 		teks = FontText.font_small.render(f"Dalam box = {bola.in_box}", False, COLORS.white)
 		window.surface.blit(teks, (420, 610))
+		teks = FontText.font_small.render("Custom", False, COLORS.white)
+		window.surface.blit(teks, (custom_vel.pos.x, custom_vel.pos.y - 50))
+		teks = FontText.font_small.render("Velocity X", False, COLORS.white)
+		window.surface.blit(teks, (custom_vel.pos.x, custom_vel.pos.y - 30))
 
 		# info
 		if not show_info:
