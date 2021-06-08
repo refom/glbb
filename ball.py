@@ -185,7 +185,7 @@ class Bola:
 				self.pos.y = self.radius
 
 		# ground
-		if self.pos.y > 600 - self.radius:
+		if self.pos.y > 500 - self.radius:
 			if self.can_bounce:
 				self.fix_bounce()
 				self.velocity.y = -self.velocity.y * self.koef
@@ -195,7 +195,7 @@ class Bola:
 			else:
 				self.velocity.y = 0
 				self.in_air = False
-			self.pos.y = 600 - self.radius
+			self.pos.y = 500 - self.radius
 			self.acc.y += -self.acc.y
 
 		self.rect.bottom = self.pos.y
@@ -220,7 +220,7 @@ class Bola:
 
 	# Other
 	def fix_bounce(self):
-		penetrate = 600 - self.pos.y - self.radius
+		penetrate = 500 - self.pos.y - self.radius
 		if penetrate < 0:
 			self.pos.y -= 2 * penetrate
 
@@ -293,6 +293,10 @@ class Bola:
 					self.friction += 0.01
 				if event.key == pygame.K_1:
 					self.friction -= 0.01
+				if event.key == pygame.K_r:
+					self.koef += 0.1
+				if event.key == pygame.K_t:
+					self.koef -= 0.1
 
 			if event.type == pygame.KEYUP:
 				if event.key == pygame.K_a:

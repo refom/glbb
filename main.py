@@ -19,16 +19,19 @@ class Window:
 		self.clock = pygame.time.Clock()
 		self.run = True
 		self.fps = 120
+		self.background = pygame.image.load("desert.png")
 
 	def update(self):
 		self.size = self.surface.get_size()
-		self.surface.fill(COLORS.black)
+		bg = pygame.transform.scale(self.background, self.size)
+		self.surface.blit(bg, (0,0))
+
 	
 
 def render_teks(surface, arr, x, y, get_x=False, get_y=False):
 	x_temp = 0
 	for t in arr:
-		t_obj = FontText.font_small.render(t, False, COLORS.white)
+		t_obj = FontText.font_small.render(t, False, COLORS.black)
 		surface.blit(t_obj, (x, y))
 		y += 20
 		
@@ -46,25 +49,25 @@ def main():
 	pygame.init()
 
 	window = Window((1000, 640))
-	bola = Bola((400, 450), 0.9)
+	bola = Bola((400, 450), 0.5, COLORS.deepskyblue)
 
 	# Font
 	FontText.title = os.path.join(os.getcwd(), "data", "font", "Kenney Blocks.ttf")
 	FontText.normal = os.path.join(os.getcwd(), "data", "font", "Kenney Mini Square.ttf")
 	FontText.update()
 
-	si_teks = FontText.font_semi_normal.render(f"Show info >", False, COLORS.white)
+	si_teks = FontText.font_semi_normal.render(f"Show info >", False, COLORS.black)
 	si_rect = si_teks.get_rect(x=20, y=20)
 	show_info = False
 
-	stat_teks = FontText.font_semi_normal.render(f"< Bola stats :", False, COLORS.white)
+	stat_teks = FontText.font_semi_normal.render(f"< Bola stats :", False, COLORS.black)
 	stat_rect = stat_teks.get_rect(x=20, y=20)
 
-	custom_vel = InputBox((0, 0), (100, 30), 0)
+	custom_vel = InputBox((0, 0), (100, 30), 0, text_color=COLORS.black)
 	custom_vel.font = FontText.font_small
 
-	btn_right = Button((0,0), (50,50))
-	btn_left = Button((0,0), (50,50), left=True)
+	btn_right = Button((0,0), (50,50), COLORS.black)
+	btn_left = Button((0,0), (50,50), COLORS.black, left=True)
 
 	while window.run:
 		events = pygame.event.get()
@@ -121,20 +124,20 @@ def main():
 		btn_right.render(window.surface)
 		btn_left.render(window.surface)
 
-		# Tanah
-		pygame.draw.line(window.surface, COLORS.white, (0, 600), (window.size[0], 600))
+		# # Tanah
+		# pygame.draw.line(window.surface, COLORS.black, (0, 600), (window.size[0], 600))
 
-		teks = FontText.font_small.render(f"fps = {int(window.clock.get_fps())}", False, COLORS.white)
+		teks = FontText.font_small.render(f"fps = {int(window.clock.get_fps())}", False, COLORS.black)
 		window.surface.blit(teks, (window.size[0] - 100, 20))
-		teks = FontText.font_small.render(f"Elastis = {bola.can_bounce}", False, COLORS.white)
+		teks = FontText.font_small.render(f"Elastis = {bola.can_bounce}", False, COLORS.black)
 		window.surface.blit(teks, (20, 610))
-		teks = FontText.font_small.render(f"Konstan = {bola.constant}", False, COLORS.white)
+		teks = FontText.font_small.render(f"Konstan = {bola.constant}", False, COLORS.black)
 		window.surface.blit(teks, (220, 610))
-		teks = FontText.font_small.render(f"Dalam box = {bola.in_box}", False, COLORS.white)
+		teks = FontText.font_small.render(f"Dalam box = {bola.in_box}", False, COLORS.black)
 		window.surface.blit(teks, (420, 610))
-		teks = FontText.font_small.render("Custom", False, COLORS.white)
+		teks = FontText.font_small.render("Custom", False, COLORS.black)
 		window.surface.blit(teks, (custom_vel.pos.x, custom_vel.pos.y - 50))
-		teks = FontText.font_small.render("Velocity X", False, COLORS.white)
+		teks = FontText.font_small.render("Velocity X", False, COLORS.black)
 		window.surface.blit(teks, (custom_vel.pos.x, custom_vel.pos.y - 30))
 
 		# info
@@ -151,6 +154,7 @@ def main():
 				f"friction",
 				f"vel x",
 				f"vel y",
+				f"koefisien",
 			]
 			value = [
 				f"= {bola.size/2}",
@@ -160,6 +164,7 @@ def main():
 				f"= {bola.friction:.3f}",
 				f"= {bola.velocity.x:.3f}",
 				f"= {bola.velocity.y:.3f}",
+				f"= {bola.koef:.2f}",
 			]
 
 			# Teks
@@ -172,7 +177,7 @@ def main():
 
 			# Keys
 			y += 20
-			teks = FontText.font_small.render("- Keys :", False, COLORS.white)
+			teks = FontText.font_small.render("- Keys :", False, COLORS.black)
 			window.surface.blit(teks, (20, y))
 			y += 20
 
